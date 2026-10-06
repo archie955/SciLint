@@ -1,0 +1,8 @@
+{
+    "cSpell.words": [
+        "physcheck",
+        "pyrefly",
+        "scilint"
+    ],
+    "python.analysis.typeCheckingMode": "standard",
+}
