@@ -1,77 +1,42 @@
 """
-Examples of violations and non-violations for the first draft
+Example of how to create units and scales
 """
-from typing import Literal
-from typing import Annotated
-UNITS: Literal["L", "M", "T", "A", "K", "mol", "cd"]
 
-class Unit:
-    def __init__(self, L: float = 0.0, M: float = 0.0, T: float = 0.0, A: float = 0.0, K: float = 0.0, mol: float = 0.0, cd: float = 0.0):
-        self.L = L
-        self.M = M
-        self.T = T
-        self.A = A
-        self.K = K
-        self.mol = mol
-        self.cd = cd
-        self.units: set[str] = {"L", "M", "T", "A", "K", "mol", "cd"}
-        self.utou: dict[tuple[str, str], function] = {}
+from unit.scale import Scale
+from unit.Unit import Unit
 
-    def __add__(self, other):
-        return Unit(
-            L = self.L + other.L,
-            M = self.M + other.M,
-            T = self.T + other.T,
-            A = self.A + other.A,
-            K = self.K + other.K,
-            mol = self.mol + other.mol,
-            cd = self.cd + other.cd,
-        )
 
-    def __radd__(self, other):
-        return self + other
+class Length(Unit):
+    pass
 
-    def __mul__(self, other: float | int):
-        return Unit(
-            L = self.L * other,
-            M = self.M * other,
-            T = self.T * other,
-            A = self.A * other,
-            K = self.K * other,
-            mol = self.mol * other,
-            cd = self.cd * other,
-        )
-    def __rmul__(self, other: float | int):
-        return self * other
+class Time(Unit):
+    pass
 
-    def __neg__(self):
-        return Unit(
-            L = self.L * -1,
-            M = self.M * -1,
-            T = self.T * -1,
-            A = self.A * -1,
-            K = self.K * -1,
-            mol = self.mol * -1,
-            cd = self.cd * -1,
-        )
+Length.add_scale(Scale("metre", "m", factor=1.0), is_base=True)
+Length.add_scale(Scale("foot", "ft", factor=0.3048))
 
-    def __sub__(self, other):
-        return self + (-other)
+Time.add_scale(Scale("second", "s", factor=1.0), is_base=True)
 
-    def create_unit(self, unit: str):
-        self.units.add(unit)
+ms = Annotated[float, "m,s^-1"]
+fts = Annotated[float, "ft,s-1"]
+m = Annotated[float, "m"]
+ft = Annotated[float, "ft"]
+s = Annotated[float, "s"]
 
-    def create_scaled_unit(self, unit: str, new_name: str, scale: float):
-        if unit not in self.units:
-            raise Exception
+def average_speed_auto_scale(distance: ft, time: s) -> ms:
+    speed_fts: fts = distance / time
+    return speed_fts # This will be automatically fixed by linter in --fix mode
 
-        
+def average_speed_wrong_units(distance: m, time: s) -> ms:
+    return distance / (time**2) # This will raise an error
 
-FACTOR = 0.5
+@scilint.scale_convert(fts, ms)
+def your_conversion_function(fts: fts) -> ms:
+    """no need to explicitly type from this point
+    the decorator means to trust without investigation
+    """
+    # return answer
+    pass
 
-Mass: Annotated[float, "sl:M"]
-Velocity: Annotated[float, "sl:L/T"]
-Energy: Annotated[float, "sl:E"]
-
-def kinetic_energy(m: Mass, v: Velocity):
-    return 0.5 * m * v**2
+def average_speed_pre_converted(distance: ft, time: s) -> ms:
+    return your_conversion_function(distance / time) # no errors raised
