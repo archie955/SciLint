@@ -1,5 +1,7 @@
 """singleton for source of truth of all units"""
 
+from dimensions import Dimension
+
 
 class Units:
     instance = None
@@ -13,10 +15,10 @@ class Units:
 
     @classmethod
     def add_dimension(cls, dim: Dimension):
-        already_exist = cls.__scales__.get(dim.name)
+        already_exists = cls.__dims__.get(dim.name)
         if already_exists:
             raise KeyError("dimensions name already taken")
-        cls.__scales__[dim.name] = dim
+        cls.__dims__[dim.name] = dim
 
     @classmethod
     def add_unit(cls, unit_name: str):

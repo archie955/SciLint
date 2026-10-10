@@ -1,5 +1,4 @@
-"""Example of how to create units and scales
-"""
+"""Example of how to create units and scales"""
 
 from unit.scale import Scale
 from unit.Unit import Unit
